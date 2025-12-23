@@ -81,7 +81,7 @@ Kaeru/
     Open your browser and visit: `http://127.0.0.1:5000`
 
 5.  **Log In**
-    * Use your brain .
+    * Password: admin
 ---
 <h1> Developer Info: </h1>
 <div align="center">
