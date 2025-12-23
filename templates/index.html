@@ -1,15 +1,17 @@
 <!DOCTYPE html>
 <html lang="en" class="dark">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Kaeru</title>
-    
+
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Roboto+Condensed:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto+Condensed:ital,wght@0,100..900;1,100..900&display=swap"
+        rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Aoboshi+One&family=Redressed&display=swap" rel="stylesheet">
-    
+
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
         tailwind.config = {
@@ -45,10 +47,23 @@
 
     <style>
         /* Custom Scrollbar */
-        ::-webkit-scrollbar { width: 6px; height: 6px; }
-        ::-webkit-scrollbar-track { background: #0f172a; }
-        ::-webkit-scrollbar-thumb { background: #334155; border-radius: 4px; }
-        ::-webkit-scrollbar-thumb:hover { background: #475569; }
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #0f172a;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #334155;
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: #475569;
+        }
 
         .transparent-input {
             background: transparent;
@@ -60,6 +75,7 @@
             padding: 0;
             margin: 0;
         }
+
         .transparent-input:focus {
             border-bottom: 1px solid #38bdf8;
         }
@@ -70,7 +86,7 @@
             pointer-events: none;
             transition: all 0.8s ease;
         }
-        
+
         .timeline-active {
             opacity: 1;
             filter: blur(0);
@@ -84,16 +100,22 @@
         }
     </style>
 </head>
-<body class="bg-kaeru-dark text-white font-body h-screen flex flex-col overflow-hidden selection:bg-kaeru-accent selection:text-black">
 
-    <div id="login-overlay" class="fixed inset-0 z-50 flex flex-col items-center justify-center bg-black/80 backdrop-blur-md transition-opacity duration-500">
-        <h1 class="font-logo text-6xl mb-2 text-kaeru-accent tracking-wider drop-shadow-[0_0_10px_rgba(56,189,248,0.5)]">かえる</h1>
+<body
+    class="bg-kaeru-dark text-white font-body h-screen flex flex-col overflow-hidden selection:bg-kaeru-accent selection:text-black">
+
+    <div id="login-overlay"
+        class="fixed inset-0 z-50 flex flex-col items-center justify-center bg-black/80 backdrop-blur-md transition-opacity duration-500">
+        <h1
+            class="font-logo text-6xl mb-2 text-kaeru-accent tracking-wider drop-shadow-[0_0_10px_rgba(56,189,248,0.5)]">
+            かえる</h1>
         <h2 class="text-2xl mb-8 text-white opacity-80">Kaeru</h2>
-        
+
         <div class="flex flex-col gap-4 w-64">
-            <input type="password" id="password-input" placeholder="Password" 
+            <input type="password" id="password-input" placeholder="Password"
                 class="bg-kaeru-panel border border-slate-600 rounded px-4 py-2 text-center text-xl focus:border-kaeru-accent focus:ring-1 focus:ring-kaeru-accent outline-none transition-all placeholder-slate-600 text-kaeru-accent">
-            <button onclick="attemptLogin()" class="bg-kaeru-accent text-black font-bold py-2 rounded hover:bg-sky-300 transition-colors uppercase tracking-widest text-sm shadow-[0_0_15px_rgba(56,189,248,0.3)]">
+            <button onclick="attemptLogin()"
+                class="bg-kaeru-accent text-black font-bold py-2 rounded hover:bg-sky-300 transition-colors uppercase tracking-widest text-sm shadow-[0_0_15px_rgba(56,189,248,0.3)]">
                 Enter
             </button>
             <p id="login-error" class="text-red-500 text-center text-sm hidden">Access Denied</p>
@@ -101,18 +123,20 @@
     </div>
 
     <div id="app-container" class="timeline-spoiler flex-1 flex flex-col h-full p-6 max-w-7xl mx-auto w-full">
-        
+
         <header class="flex justify-between items-center mb-6 border-b border-slate-800 pb-4">
             <div>
                 <h1 class="font-logo text-4xl text-kaeru-accent leading-none">Kaeru</h1>
                 <span class="text-xs text-slate-500 font-mono justify-center tracking-[0.3em]">か え る</span>
             </div>
-            
+
             <div class="flex gap-4">
-                <button onclick="addCheckpoint()" class="text-xs flex items-center gap-2 bg-slate-800 hover:bg-slate-700 px-4 py-2 rounded transition-colors border border-slate-700 text-slate-300">
+                <button onclick="addCheckpoint()"
+                    class="text-xs flex items-center gap-2 bg-slate-800 hover:bg-slate-700 px-4 py-2 rounded transition-colors border border-slate-700 text-slate-300">
                     + Checkpoint
                 </button>
-                <button onclick="logout()" class="text-xs text-slate-600 hover:text-red-400 font-bold uppercase tracking-wider pt-2">
+                <button onclick="logout()"
+                    class="text-xs text-slate-600 hover:text-red-400 font-bold uppercase tracking-wider pt-2">
                     Lock
                 </button>
             </div>
@@ -131,87 +155,146 @@
     </div>
 
     <script>
-const STORAGE_KEY = "kaeru_data_v2";
-let SERVER_PASSWORD = null;
-let appData = { checkpoints: [] };
+        /* ===================== CONFIG ===================== */
+        const STORAGE_KEY = "kaeru_data_v2";
+        let SERVER_PASSWORD = null;
+        let appData = { checkpoints: [] };
 
-// ---------- AUTH ----------
-async function attemptLogin() {
-    const pass = document.getElementById("password-input").value;
+        /* ===================== AUTH ===================== */
+        async function attemptLogin() {
+            const pass = document.getElementById("password-input").value;
 
-    const res = await fetch("/api/login", {
-        method: "POST",
-        headers: {"Content-Type": "application/json"},
-        body: JSON.stringify({password: pass})
-    });
+            const res = await fetch("/api/login", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ password: pass })
+            });
 
-    if (!res.ok) {
-        document.getElementById("login-error").classList.remove("hidden");
-        return;
-    }
+            if (!res.ok) {
+                document.getElementById("login-error").classList.remove("hidden");
+                return;
+            }
 
-    SERVER_PASSWORD = pass;
-    document.getElementById("login-overlay").classList.add("opacity-0","pointer-events-none");
-    document.getElementById("app-container").classList.remove("timeline-spoiler");
-    document.getElementById("app-container").classList.add("timeline-active");
+            SERVER_PASSWORD = pass;
 
-    await loadFromDB();
-    renderApp();
-}
+            document.getElementById("login-overlay")
+                .classList.add("opacity-0", "pointer-events-none");
+            document.getElementById("app-container")
+                .classList.remove("timeline-spoiler");
+            document.getElementById("app-container")
+                .classList.add("timeline-active");
 
-function logout() { location.reload(); }
+            await loadFromDB();
+            renderApp();
+        }
 
-// ---------- DATA ----------
-async function loadFromDB() {
-    const res = await fetch("/api/data");
-    appData = await res.json();
+        function logout() {
+            location.reload();
+        }
 
-    // MIGRATION (run once if localStorage exists)
-    const local = localStorage.getItem(STORAGE_KEY);
-    if (local && appData.checkpoints.length === 0) {
-        await migrateLocalToDB(JSON.parse(local));
-        localStorage.removeItem(STORAGE_KEY);
-        await loadFromDB();
-    }
-}
+        /* ===================== DATA ===================== */
+        async function loadFromDB() {
+            const res = await fetch("/api/data");
+            appData = await res.json();
 
-async function saveToDB() {
-    await fetch("/api/save", {
-        method: "POST",
-        headers: {"Content-Type": "application/json"},
-        body: JSON.stringify({
-            password: SERVER_PASSWORD,
-            data: appData
-        })
-    });
-    renderApp();
-}
+            // ---- ONE-TIME MIGRATION (DB-aware) ----
+            const local = localStorage.getItem(STORAGE_KEY);
+            if (local && appData.checkpoints.length === 0) {
+                await migrateLocalToDB(JSON.parse(local));
+                localStorage.removeItem(STORAGE_KEY);
+                await loadFromDB(); // reload DB state
+            }
+        }
 
-async function migrateLocalToDB(data) {
-    await fetch("/api/migrate", {
-        method: "POST",
-        headers: {"Content-Type": "application/json"},
-        body: JSON.stringify({
-            password: SERVER_PASSWORD,
-            data
-        })
-    });
-}
+        async function saveToDB() {
+            await fetch("/api/save", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    password: SERVER_PASSWORD,
+                    data: appData
+                })
+            });
 
-// ---------- CRUD ----------
-function updateField(field, i, v){ appData.checkpoints[i][field]=v; saveToDB(); }
-function addCheckpoint(){ appData.checkpoints.push(createCheckpointStructure("New",3)); saveToDB(); }
-function deleteCP(i){ if(confirm("Delete?")){ appData.checkpoints.splice(i,1); saveToDB(); }}
+            renderApp();
+        }
 
-function addSegment(i){ appData.checkpoints[i].segments.push({name:"New",todos:[]}); saveToDB(); }
-function delSeg(i,s){ appData.checkpoints[i].segments.splice(s,1); saveToDB(); }
-function updateSegName(i,s,v){ appData.checkpoints[i].segments[s].name=v; saveToDB(); }
+        async function migrateLocalToDB(data) {
+            await fetch("/api/migrate", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    password: SERVER_PASSWORD,
+                    data: data
+                })
+            });
+        }
 
-function addTodo(i,s){ appData.checkpoints[i].segments[s].todos.push({text:"Task",done:false}); saveToDB(); }
-function delTodo(i,s,t){ appData.checkpoints[i].segments[s].todos.splice(t,1); saveToDB(); }
-function toggleTodo(i,s,t){ appData.checkpoints[i].segments[s].todos[t].done=!appData.checkpoints[i].segments[s].todos[t].done; saveToDB(); }
-function updateTodo(i,s,t,v){ appData.checkpoints[i].segments[s].todos[t].text=v; saveToDB(); }
-</script>
+        /* ===================== CRUD ===================== */
+        // ---- Checkpoints ----
+        function updateField(field, i, v) {
+            appData.checkpoints[i][field] = v;
+            saveToDB();
+        }
+
+        function addCheckpoint() {
+            appData.checkpoints.push(createCheckpointStructure("New", 3));
+            saveToDB();
+        }
+
+        function deleteCP(i) {
+            if (confirm("Delete checkpoint?")) {
+                appData.checkpoints.splice(i, 1);
+                saveToDB();
+            }
+        }
+
+        // ---- Segments ----
+        function addSegment(i) {
+            appData.checkpoints[i].segments.push({
+                name: "New",
+                todos: []
+            });
+            saveToDB();
+        }
+
+        function delSeg(i, s) {
+            appData.checkpoints[i].segments.splice(s, 1);
+            saveToDB();
+        }
+
+        function updateSegName(i, s, v) {
+            appData.checkpoints[i].segments[s].name = v;
+            saveToDB();
+        }
+
+        // ---- Todos ----
+        function addTodo(i, s) {
+            appData.checkpoints[i].segments[s].todos.push({
+                text: "Task",
+                done: false
+            });
+            saveToDB();
+        }
+
+        function delTodo(i, s, t) {
+            appData.checkpoints[i].segments[s].todos.splice(t, 1);
+            saveToDB();
+        }
+
+        function toggleTodo(i, s, t) {
+            const todo = appData.checkpoints[i].segments[s].todos[t];
+            todo.done = !todo.done;
+            saveToDB();
+        }
+
+        function updateTodo(i, s, t, v) {
+            appData.checkpoints[i].segments[s].todos[t].text = v;
+            saveToDB();
+        }
+    </script>
+
 
 </body>
+
 </html>
