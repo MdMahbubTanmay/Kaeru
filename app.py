@@ -3,63 +3,80 @@ import json
 import os
 from flask import Flask, request, jsonify, render_template
 
-app = Flask(__name__)
-DB_FILE = "/var/data/kaeru.db" 
-# (On your local computer, this path won't exist, so you might want to use logic like:)
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+DB_FILE = os.path.join(BASE_DIR, "kaeru.db")
+PASSWORD_FILE = os.path.join(BASE_DIR, "password.txt")
 
-import os
-if os.environ.get('RENDER'):
-    DB_FILE = "/var/data/kaeru.db"
-else:
-    DB_FILE = "kaeru.db"
+app = Flask(__name__, template_folder="templates")
 
-# --- DATABASE SETUP ---
+# ---------- PASSWORD ----------
+def get_server_password():
+    if not os.path.exists(PASSWORD_FILE):
+        raise RuntimeError("password.txt missing on server")
+    with open(PASSWORD_FILE, "r") as f:
+        return f.read().strip()
+
+# ---------- DATABASE ----------
 def init_db():
-    """Creates the database file and table if they don't exist."""
     with sqlite3.connect(DB_FILE) as conn:
-        conn.execute("CREATE TABLE IF NOT EXISTS timeline (id INTEGER PRIMARY KEY, data TEXT)")
-        
-        # Check if empty, if so, insert a blank record
-        cursor = conn.cursor()
-        cursor.execute("SELECT count(*) FROM timeline")
-        if cursor.fetchone()[0] == 0:
-            default_data = {"checkpoints": []}
-            conn.execute("INSERT INTO timeline (id, data) VALUES (1, ?)", (json.dumps(default_data),))
+        conn.execute("""
+            CREATE TABLE IF NOT EXISTS timeline (
+                id INTEGER PRIMARY KEY,
+                data TEXT NOT NULL
+            )
+        """)
+        cur = conn.execute("SELECT COUNT(*) FROM timeline")
+        if cur.fetchone()[0] == 0:
+            conn.execute(
+                "INSERT INTO timeline (id, data) VALUES (1, ?)",
+                (json.dumps({"checkpoints": []}),)
+            )
 
-# --- ROUTES ---
-
-@app.route('/')
+# ---------- ROUTES ----------
+@app.route("/")
 def home():
-    """Serves the HTML file."""
-    return render_template('index.html')
+    return render_template("index.html")
 
-@app.route('/api/data', methods=['GET'])
-def get_data():
-    """Reads the JSON from the database."""
+@app.route("/api/login", methods=["POST"])
+def login():
+    password = request.json.get("password", "")
+    if password == get_server_password():
+        return jsonify({"success": True})
+    return jsonify({"success": False}), 403
+
+@app.route("/api/data", methods=["GET"])
+def load_data():
     with sqlite3.connect(DB_FILE) as conn:
-        cursor = conn.execute("SELECT data FROM timeline WHERE id=1")
-        row = cursor.fetchone()
-        # Return the data, or empty object if something went wrong
-        return jsonify(json.loads(row[0])) if row else {}
+        cur = conn.execute("SELECT data FROM timeline WHERE id=1")
+        row = cur.fetchone()
+        return jsonify(json.loads(row[0]))
 
-@app.route('/api/save', methods=['POST'])
+@app.route("/api/save", methods=["POST"])
 def save_data():
-    """Writes the JSON to the database."""
-    req_data = request.json
-    password = req_data.get('password')
-    app_data = req_data.get('data')
+    payload = request.json
+    if payload.get("password") != get_server_password():
+        return jsonify({"success": False}), 403
 
-    # Security Check
-    if password != "admin":
-        return jsonify({"success": False, "message": "Wrong Password"}), 403
-
-    # Save to SQLite
     with sqlite3.connect(DB_FILE) as conn:
-        conn.execute("UPDATE timeline SET data = ? WHERE id=1", (json.dumps(app_data),))
-    
+        conn.execute(
+            "UPDATE timeline SET data=? WHERE id=1",
+            (json.dumps(payload["data"]),)
+        )
     return jsonify({"success": True})
 
-if __name__ == '__main__':
+@app.route("/api/migrate", methods=["POST"])
+def migrate():
+    payload = request.json
+    if payload.get("password") != get_server_password():
+        return jsonify({"success": False}), 403
+
+    with sqlite3.connect(DB_FILE) as conn:
+        conn.execute(
+            "UPDATE timeline SET data=? WHERE id=1",
+            (json.dumps(payload["data"]),)
+        )
+    return jsonify({"success": True, "message": "Migration completed"})
+
+if __name__ == "__main__":
     init_db()
-    print("Kaeru is running at http://127.0.0.1:5000")
-    app.run(debug=True, port=5000)
+    app.run(debug=True)
