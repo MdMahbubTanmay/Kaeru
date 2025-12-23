@@ -25,12 +25,10 @@ def init_db():
                 data TEXT NOT NULL
             )
         """)
-        cur = conn.execute("SELECT COUNT(*) FROM timeline")
-        if cur.fetchone()[0] == 0:
-            conn.execute(
-                "INSERT INTO timeline (id, data) VALUES (1, ?)",
-                (json.dumps({"checkpoints": []}),)
-            )
+        conn.execute("""
+            INSERT OR IGNORE INTO timeline (id, data)
+            VALUES (1, ?)
+        """, (json.dumps({"checkpoints": []}),))
 
 init_db()
 
@@ -48,23 +46,47 @@ def login():
 
 @app.route("/api/data", methods=["GET"])
 def load_data():
-    with sqlite3.connect(DB_FILE) as conn:
-        cur = conn.execute("SELECT data FROM timeline WHERE id=1")
-        row = cur.fetchone()
-        return jsonify(json.loads(row[0]))
+    try:
+        with sqlite3.connect(DB_FILE) as conn:
+            cur = conn.execute("SELECT data FROM timeline WHERE id=1")
+            row = cur.fetchone()
+
+            if row is None:
+                # self-heal database
+                empty_data = {"checkpoints": []}
+                conn.execute(
+                    "INSERT OR REPLACE INTO timeline (id, data) VALUES (1, ?)",
+                    (json.dumps(empty_data),)
+                )
+                return jsonify(empty_data)
+
+            return jsonify(json.loads(row[0]))
+
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
 
 @app.route("/api/save", methods=["POST"])
 def save_data():
-    payload = request.json
-    if payload.get("password") != get_server_password():
-        return jsonify({"success": False}), 403
+    try:
+        payload = request.get_json(force=True)
 
-    with sqlite3.connect(DB_FILE) as conn:
-        conn.execute(
-            "UPDATE timeline SET data=? WHERE id=1",
-            (json.dumps(payload["data"]),)
-        )
-    return jsonify({"success": True})
+        if payload.get("password") != get_server_password():
+            return jsonify({"success": False}), 403
+
+        data = payload.get("data")
+        if data is None:
+            return jsonify({"error": "No data provided"}), 400
+
+        with sqlite3.connect(DB_FILE) as conn:
+            conn.execute(
+                "UPDATE timeline SET data=? WHERE id=1",
+                (json.dumps(data),)
+            )
+
+        return jsonify({"success": True})
+
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
 
 @app.route("/api/migrate", methods=["POST"])
 def migrate():
