@@ -32,6 +32,8 @@ def init_db():
                 (json.dumps({"checkpoints": []}),)
             )
 
+init_db()
+
 # ---------- ROUTES ----------
 @app.route("/")
 def home():
@@ -77,6 +79,4 @@ def migrate():
         )
     return jsonify({"success": True, "message": "Migration completed"})
 
-if __name__ == "__main__":
-    init_db()
-    app.run(debug=True)
+
