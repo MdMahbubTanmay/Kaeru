@@ -6,7 +6,8 @@
   <br />
 
   <h1 style="font-size: 3rem; margin: 0;">Kaeru</h1>
-  <p>A Minimalist, Fish-Eye Timeline Manager for Solopreneurs.</p>
+  <h1 style="font-size: 1rem; margin: 0;">⚠️Admin Usage Only</h1>
+  <p>[Kaeru-site](https://irshad11.pythonanywhere.com/)</p>
 
   <p>
     <img src="https://img.shields.io/badge/Tailwind-Frontend-38B2AC?style=for-the-badge&logo=tailwindcss&logoColor=white" alt="Tailwind" />
@@ -18,7 +19,6 @@
 </div>
 
 
-## ⚠️ Important Note: Admin Usage Only
 
 > **This application is designed as a single-user tool.**
 
