@@ -71,7 +71,7 @@ Kaeru/
     ```
 
 3.  **Start the Server**
-4.  *Before running server comment out `app.py` app.run command around 105-6 lines*
+  *Before running server comment out `app.py` app.run command around 105-6 lines*
     ```bash
     python app.py
     ```
