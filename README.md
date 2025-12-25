@@ -61,8 +61,8 @@ Kaeru/
 
 1.  **Clone the Repository**
     ```bash
-    git clone [https://github.com/Irshad-11/kaeru-app.git](https://github.com/Irshad-11/Kaeru.git)
-    cd kaeru-app
+    git clone https://github.com/Irshad-11/Kaeru.git
+    cd Kaeru
     ```
 
 2.  **Install Dependencies**
