@@ -194,8 +194,7 @@
 
       // --- AUTH ---
       async function attemptLogin() {
-        // const password = document.getElementById('password-input').value;
-        const password = "komol";
+        const password = document.getElementById('password-input').value;
         const res = await fetch("/api/login", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
