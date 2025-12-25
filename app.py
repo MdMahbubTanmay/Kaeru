@@ -101,4 +101,6 @@ def migrate():
         )
     return jsonify({"success": True, "message": "Migration completed"})
 
-
+# if __name__ == "__main__":
+#     app.run(host="0.0.0.0", port=5000, debug=True)
+# Uncomment the above lines to run the app directly.
