@@ -1,5 +1,6 @@
 import sqlite3
 import json
+from datetime import datetime
 import os
 from flask import Flask, request, jsonify, render_template
 
@@ -29,6 +30,15 @@ def init_db():
             INSERT OR IGNORE INTO timeline (id, data)
             VALUES (1, ?)
         """, (json.dumps({"checkpoints": []}),))
+        
+        conn.execute("""
+            CREATE TABLE IF NOT EXISTS notes (
+                id INTEGER PRIMARY KEY,
+                title TEXT,
+                content TEXT,
+                updated_at TEXT
+            )
+        """)
 
 init_db()
 
@@ -101,6 +111,59 @@ def migrate():
         )
     return jsonify({"success": True, "message": "Migration completed"})
 
+
+@app.route("/api/notes", methods=["GET"])
+def get_notes():
+    with sqlite3.connect(DB_FILE) as conn:
+        cur = conn.execute(
+            "SELECT id, title, content, updated_at FROM notes ORDER BY updated_at DESC"
+        )
+        notes = [
+            {
+                "id": r[0],
+                "title": r[1],
+                "content": r[2],
+                "updated": r[3],
+            }
+            for r in cur.fetchall()
+        ]
+    return jsonify(notes)
+
+
+@app.route("/api/notes/save", methods=["POST"])
+def save_note():
+    payload = request.json
+    if payload.get("password") != get_server_password():
+        return jsonify({"success": False}), 403
+
+    note = payload["note"]
+    now = datetime.utcnow().isoformat()
+
+    with sqlite3.connect(DB_FILE) as conn:
+        conn.execute("""
+            INSERT INTO notes (id, title, content, updated_at)
+            VALUES (?, ?, ?, ?)
+            ON CONFLICT(id) DO UPDATE SET
+              title=excluded.title,
+              content=excluded.content,
+              updated_at=excluded.updated_at
+        """, (note["id"], note["title"], note["content"], now))
+
+    return jsonify({"success": True})
+
+
+@app.route("/api/notes/delete", methods=["POST"])
+def delete_note():
+    payload = request.json
+    if payload.get("password") != get_server_password():
+        return jsonify({"success": False}), 403
+
+    with sqlite3.connect(DB_FILE) as conn:
+        conn.execute("DELETE FROM notes WHERE id=?", (payload["id"],))
+
+    return jsonify({"success": True})
+
+
 # if __name__ == "__main__":
-#     app.run(host="0.0.0.0", port=5000, debug=True)
+#     app.run(debug=True)
 # Uncomment the above lines to run the app directly.
