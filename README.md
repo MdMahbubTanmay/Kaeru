@@ -24,7 +24,7 @@
 
 > **This application is designed as a single-user tool.**
 
-It is **not** a multi-user SaaS application. It is built for a single administrator (you) to manage a project timeline.
+It is **not** a multi-user SaaS application. It is built for a single administrator to manage a project timeline.
 * **Security:** Access is protected by a global password (defined in `app.py`).
 * **Data:** All data is stored in a single SQLite file (`kaeru.db`).
 * **State:** Changes made by the admin are reflected globally.
@@ -61,26 +61,26 @@ Kaeru/
 
 1.  **Clone the Repository**
     ```bash
-    git clone [https://github.com/Irshad-11/kaeru-app.git](https://github.com/Irshad-11/Kaeru.git)
-    cd kaeru-app
+    git clone https://github.com/Irshad-11/Kaeru.git
+    cd Kaeru
     ```
 
 2.  **Install Dependencies**
-    *It is recommended to run this in a virtual environment, but for a quick start:*
     ```bash
     pip install -r requirements.txt
     ```
 
 3.  **Start the Server**
+  *Before running server comment out `app.py` app.run command around 105-6 lines*
     ```bash
     python app.py
     ```
     *You should see: `Running on http://127.0.0.1:5000`*
 
-4.  **Access the App**
+5.  **Access the App**
     Open your browser and visit: `http://127.0.0.1:5000`
 
-5.  **Log In**
+6.  **Log In**
     * Password: admin
 ---
 <h1> Developer Info: </h1>
