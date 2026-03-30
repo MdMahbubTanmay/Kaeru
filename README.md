@@ -5,7 +5,7 @@
   <br />
   <br />
 
-  <h1 style="font-size: 3rem; margin: 0;">Kaeru 😉🫶</h1>
+  <h1 style="font-size: 3rem; margin: 0;">Kaeru 😉🫶🔥🫦🫣🤮</h1>
   <h4 style="font-size: 1rem; margin: 0;">⚠️Admin (And admins wife) Usage Only</h4>
   <p align="center">
   <a href="irshad11.pythonanywhere.com">Kaeru</a>
